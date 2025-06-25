@@ -1,0 +1,18 @@
+{
+  "rust-analyzer.check.allTargets": false,
+  "rust-analyzer.check.noDefaultFeatures": true,
+  "rust-analyzer.cargo.noDefaultFeatures": true,
+  "rust-analyzer.showUnlinkedFileNotification": false,
+  // Uncomment the target of your chip.
+  //"rust-analyzer.cargo.target": "thumbv6m-none-eabi",
+  //"rust-analyzer.cargo.target": "thumbv7m-none-eabi",
+  "rust-analyzer.cargo.target": "thumbv7em-none-eabi",
+  //"rust-analyzer.cargo.target": "thumbv7em-none-eabihf",
+  //"rust-analyzer.cargo.target": "thumbv8m.main-none-eabihf",
+  "rust-analyzer.cargo.features": [
+    // Comment out these features when working on the examples. Most example crates do not have any cargo features.
+  ],
+  "rust-analyzer.linkedProjects": [
+
+  ],
+}
