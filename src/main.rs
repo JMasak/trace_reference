@@ -13,9 +13,10 @@ use {defmt_rtt as _, panic_probe as _};
 static LED1_SIGNAL: Signal<ThreadModeRawMutex, bool> = Signal::new();
 static LED2_SIGNAL: Signal<ThreadModeRawMutex, bool> = Signal::new();
 static LED3_SIGNAL: Signal<ThreadModeRawMutex, bool> = Signal::new();
+static MAIN_SIGNAL: Signal<ThreadModeRawMutex, bool> = Signal::new();
 
 #[embassy_executor::task(pool_size = 3)]
-async fn handle_led(mut led: Output<'static>, signal: &'static Signal<ThreadModeRawMutex, bool>, name: &'static str) {
+async fn handle_led(mut led: Output<'static>, signal: &'static Signal<ThreadModeRawMutex, bool>, name: &'static str, next_signal: &'static Signal<ThreadModeRawMutex, bool>, wait: u16) {
     loop {
         let state = signal.wait().await;
         led.set_level(
@@ -25,6 +26,8 @@ async fn handle_led(mut led: Output<'static>, signal: &'static Signal<ThreadMode
             }
         );
         info!("Set {} to: {}", name, state);
+        Timer::after_millis(wait as u64).await;
+        next_signal.signal(state);
     }
 }
 
@@ -37,23 +40,12 @@ async fn main(spawner: Spawner) {
     let led2 = Output::new(p.PA9, Level::High, Speed::Low);
     let led3 = Output::new(p.PA10, Level::High, Speed::Low);
 
-    spawner.spawn(handle_led(led1, &LED1_SIGNAL, "LED1")).unwrap();
-    spawner.spawn(handle_led(led2, &LED2_SIGNAL, "LED2")).unwrap();
-    spawner.spawn(handle_led(led3, &LED3_SIGNAL, "LED3")).unwrap();
+    spawner.spawn(handle_led(led1, &LED1_SIGNAL, "LED1", &LED2_SIGNAL, 500)).unwrap();
+    spawner.spawn(handle_led(led2, &LED2_SIGNAL, "LED2", &LED3_SIGNAL, 200)).unwrap();
+    spawner.spawn(handle_led(led3, &LED3_SIGNAL, "LED3", &MAIN_SIGNAL, 500)).unwrap();
 
-    let mut count = 1;
-
+    LED1_SIGNAL.signal(true);
     loop {
-        match count {
-            1 => { LED1_SIGNAL.signal(true); }
-            2 => { LED2_SIGNAL.signal(true); }
-            3 => { LED3_SIGNAL.signal(true); }
-            4 => { LED1_SIGNAL.signal(false); }
-            5 => { LED2_SIGNAL.signal(false); }
-            6 => { LED3_SIGNAL.signal(false); }
-            _ => { count = 1; continue; }
-        }
-        count += 1;
-        Timer::after_millis(500).await;
+        LED1_SIGNAL.signal( !MAIN_SIGNAL.wait().await);
     }
 }
