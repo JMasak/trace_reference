@@ -34,6 +34,18 @@ async fn handle_led(mut led: Output<'static>, signal: &'static Signal<ThreadMode
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
+
+    embassy_stm32::pac::GPIOE.afr(0).write(|w| w.set_afr(2, 0));
+    embassy_stm32::pac::GPIOE.afr(0).write(|w| w.set_afr(3, 0));
+    embassy_stm32::pac::GPIOE.afr(0).write(|w| w.set_afr(4, 0));
+    embassy_stm32::pac::GPIOE.afr(0).write(|w| w.set_afr(5, 0));
+    embassy_stm32::pac::GPIOE.afr(0).write(|w| w.set_afr(6, 0));
+    embassy_stm32::pac::GPIOE.moder().write(|w| w.set_moder(2, embassy_stm32::pac::gpio::vals::Moder::ALTERNATE));
+    embassy_stm32::pac::GPIOE.moder().write(|w| w.set_moder(3, embassy_stm32::pac::gpio::vals::Moder::ALTERNATE));
+    embassy_stm32::pac::GPIOE.moder().write(|w| w.set_moder(4, embassy_stm32::pac::gpio::vals::Moder::ALTERNATE));
+    embassy_stm32::pac::GPIOE.moder().write(|w| w.set_moder(5, embassy_stm32::pac::gpio::vals::Moder::ALTERNATE));
+    embassy_stm32::pac::GPIOE.moder().write(|w| w.set_moder(6, embassy_stm32::pac::gpio::vals::Moder::ALTERNATE));
+
     info!("Hello World!");
 
     let led1 = Output::new(p.PA8, Level::High, Speed::Low);
